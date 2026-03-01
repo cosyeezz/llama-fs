@@ -1,4 +1,4 @@
-from groq import Groq
+from openai import OpenAI
 import json
 import os
 
@@ -28,13 +28,13 @@ Your response must be a JSON object with the following schema:
 
 
 def create_file_tree(summaries: list, session):
-    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL"))
     chat_completion = client.chat.completions.create(
         messages=[
             {"role": "system", "content": FILE_PROMPT},
             {"role": "user", "content": json.dumps(summaries)},
         ],
-        model="llama-3.1-70b-versatile",
+        model="gpt-4o-mini",
         response_format={"type": "json_object"},  # Uncomment if needed
         temperature=0,
     )

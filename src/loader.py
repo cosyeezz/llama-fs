@@ -7,7 +7,7 @@ import agentops
 import colorama
 import ollama
 import weave
-from groq import AsyncGroq, Groq
+from openai import OpenAI
 from llama_index.core import Document, SimpleDirectoryReader
 from llama_index.core.schema import ImageDocument
 from llama_index.core.node_parser import TokenTextSplitter
@@ -110,7 +110,7 @@ Write your response a JSON object with the following schema:
                     {"role": "system", "content": PROMPT},
                     {"role": "user", "content": json.dumps(doc)},
                 ],
-                model="llama-3.1-70b-versatile",
+                model="gpt-4o-mini",
                 response_format={"type": "json_object"},
                 temperature=0,
             )
@@ -148,25 +148,28 @@ Write your response a JSON object with the following schema:
 ```
 """.strip()
 
-    client = ollama.AsyncClient()
-    chat_completion = await client.chat(
+    import base64
+    with open(doc.image_path, "rb") as image_file:
+        base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+    
+    openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL"))
+    chat_completion = openai_client.chat.completions.create(
+        model="gpt-4o-mini",
         messages=[
-            # {"role": "system", "content": "Respond with one short sentence."},
             {
                 "role": "user",
-                "content": "Summarize the contents of this image.",
-                "images": [doc.image_path],
-            },
+                "content": [
+                    {"type": "text", "text": "Summarize the contents of this image in one concise sentence for file organization purposes."},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
+                ],
+            }
         ],
-        model="moondream",
-        # format="json",
-        # stream=True,
-        options={"num_predict": 128},
+        max_tokens=128,
     )
 
     summary = {
         "file_path": doc.image_path,
-        "summary": chat_completion["message"]["content"],
+        "summary": chat_completion.choices[0].message.content,
     }
 
     # Print the filename in green
@@ -187,8 +190,9 @@ async def dispatch_summarize_document(doc, client):
 
 
 async def get_summaries(documents):
-    client = Groq(
-        api_key=os.environ.get("GROQ_API_KEY"),
+    client = OpenAI(
+        api_key=os.environ.get("OPENAI_API_KEY"),
+        base_url=os.environ.get("OPENAI_BASE_URL"),
     )
     summaries = await asyncio.gather(
         *[dispatch_summarize_document(doc, client) for doc in documents]
@@ -220,8 +224,9 @@ def merge_summary_documents(summaries, metadata_list):
 
 
 def get_file_summary(path: str):
-    client = Groq(
-        api_key=os.environ.get("GROQ_API_KEY"),
+    client = OpenAI(
+        api_key=os.environ.get("OPENAI_API_KEY"),
+        base_url=os.environ.get("OPENAI_BASE_URL"),
     )
     reader = SimpleDirectoryReader(input_files=[path]).iter_data()
 
@@ -261,7 +266,7 @@ Write your response a JSON object with the following schema:
             {"role": "system", "content": PROMPT},
             {"role": "user", "content": json.dumps(doc)},
         ],
-        model="llama-3.1-70b-versatile",
+        model="gpt-4o-mini",
         response_format={"type": "json_object"},
         temperature=0,
     )
@@ -281,24 +286,28 @@ Write your response a JSON object with the following schema:
 
 
 def summarize_image_document_sync(doc: ImageDocument, client):
-    client = ollama.Client()
-    chat_completion = client.chat(
+    import base64
+    with open(doc.image_path, "rb") as image_file:
+        base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+    
+    openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL"))
+    chat_completion = openai_client.chat.completions.create(
+        model="gpt-4o-mini",
         messages=[
             {
                 "role": "user",
-                "content": "Summarize the contents of this image.",
-                "images": [doc.image_path],
-            },
+                "content": [
+                    {"type": "text", "text": "Summarize the contents of this image in one concise sentence for file organization purposes."},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
+                ],
+            }
         ],
-        model="moondream",
-        # format="json",
-        # stream=True,
-        options={"num_predict": 128},
+        max_tokens=128,
     )
-
+    
     summary = {
         "file_path": doc.image_path,
-        "summary": chat_completion["message"]["content"],
+        "summary": chat_completion.choices[0].message.content,
     }
 
     # Print the filename in green
