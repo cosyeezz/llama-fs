@@ -14,7 +14,7 @@ from llama_index.core.node_parser import TokenTextSplitter
 from termcolor import colored
 
 
-@agentops.record_function("get directory summaries")
+# 移除 agentops 装饰器（API 不兼容）
 async def get_dir_summaries(path: str):
     doc_dicts = load_documents(path)
     # metadata = process_metadata(doc_dicts)
@@ -40,7 +40,7 @@ async def get_dir_summaries(path: str):
     # ]
 
 
-@agentops.record_function("load documents")
+
 def load_documents(path: str):
     reader = SimpleDirectoryReader(
         input_dir=path,
@@ -76,7 +76,7 @@ def load_documents(path: str):
     return documents
 
 
-@agentops.record_tool("process_metadata")
+
 def process_metadata(doc_dicts):
     file_seen = set()
     metadata_list = []
@@ -200,7 +200,7 @@ async def get_summaries(documents):
     return summaries
 
 
-@agentops.record_function("merge")
+
 def merge_summary_documents(summaries, metadata_list):
     list_summaries = defaultdict(list)
 
