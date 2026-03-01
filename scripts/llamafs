@@ -1,0 +1,36 @@
+#!/bin/bash
+# LlamaFS 全局入口
+# 安装: ln -sf ~/llama-fs/scripts/llamafs /usr/local/bin/llamafs
+
+LLAMA_FS_DIR="$HOME/llama-fs"
+
+case "$1" in
+    start)
+        $LLAMA_FS_DIR/scripts/start.sh
+        ;;
+    organize)
+        $LLAMA_FS_DIR/scripts/organize.sh "$2"
+        ;;
+    sync)
+        $LLAMA_FS_DIR/scripts/sync-upstream.sh
+        ;;
+    update)
+        echo "📦 Updating dependencies..."
+        cd $LLAMA_FS_DIR
+        source venv/bin/activate
+        pip install --proxy=http://127.0.0.1:10808 -r requirements.txt --upgrade
+        ;;
+    *)
+        echo "LlamaFS - AI 文件整理工具"
+        echo ""
+        echo "用法:"
+        echo "  llamafs start              启动服务"
+        echo "  llamafs organize [folder]  整理文件夹 (默认 ~/Downloads)"
+        echo "  llamafs sync               同步上游更新"
+        echo "  llamafs update             更新依赖"
+        echo ""
+        echo "示例:"
+        echo "  llamafs start              # 启动后台服务"
+        echo "  llamafs organize ~/Desktop # 整理桌面"
+        ;;
+esac
