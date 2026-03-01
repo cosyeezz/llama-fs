@@ -110,7 +110,7 @@ Write your response a JSON object with the following schema:
                     {"role": "system", "content": PROMPT},
                     {"role": "user", "content": json.dumps(doc)},
                 ],
-                model="gpt-4o-mini",
+                model=os.environ.get("OPENAI_MODEL", "claude-haiku-4-5-20251001"),
                 response_format={"type": "json_object"},
                 temperature=0,
             )
@@ -154,7 +154,7 @@ Write your response a JSON object with the following schema:
     
     openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL"))
     chat_completion = openai_client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=os.environ.get("OPENAI_MODEL", "claude-haiku-4-5-20251001"),
         messages=[
             {
                 "role": "user",
@@ -266,7 +266,7 @@ Write your response a JSON object with the following schema:
             {"role": "system", "content": PROMPT},
             {"role": "user", "content": json.dumps(doc)},
         ],
-        model="gpt-4o-mini",
+        model=os.environ.get("OPENAI_MODEL", "claude-haiku-4-5-20251001"),
         response_format={"type": "json_object"},
         temperature=0,
     )
@@ -292,7 +292,7 @@ def summarize_image_document_sync(doc: ImageDocument, client):
     
     openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL"))
     chat_completion = openai_client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=os.environ.get("OPENAI_MODEL", "claude-haiku-4-5-20251001"),
         messages=[
             {
                 "role": "user",

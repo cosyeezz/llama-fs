@@ -34,7 +34,7 @@ def create_file_tree(summaries: list, session):
             {"role": "system", "content": FILE_PROMPT},
             {"role": "user", "content": json.dumps(summaries)},
         ],
-        model="gpt-4o-mini",
+        model=os.environ.get("OPENAI_MODEL", "claude-haiku-4-5-20251001"),
         response_format={"type": "json_object"},  # Uncomment if needed
         temperature=0,
     )
