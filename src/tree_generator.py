@@ -1,4 +1,4 @@
-from openai import OpenAI
+import anthropic  # type: ignore[reportMissingImports]
 import json
 import os
 
@@ -28,16 +28,18 @@ Your response must be a JSON object with the following schema:
 
 
 def create_file_tree(summaries: list, session):
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL"))
-    chat_completion = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": FILE_PROMPT},
-            {"role": "user", "content": json.dumps(summaries)},
-        ],
+    base_url = os.environ.get("OPENAI_BASE_URL", "").rstrip("/")
+    client = anthropic.Anthropic(
+        api_key=os.environ.get("OPENAI_API_KEY"),
+        base_url=base_url,
+        default_headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"},
+    )
+    chat_completion = client.messages.create(
         model=os.environ.get("OPENAI_MODEL", "claude-haiku-4-5-20251001"),
-        response_format={"type": "json_object"},  # Uncomment if needed
-        temperature=0,
+        max_tokens=4096,
+        system=FILE_PROMPT,
+        messages=[{"role": "user", "content": json.dumps(summaries)}],
     )
 
-    file_tree = json.loads(chat_completion.choices[0].message.content)["files"]
+    file_tree = json.loads(chat_completion.content[0].text)["files"]
     return file_tree
